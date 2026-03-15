@@ -1,0 +1,88 @@
+# Node modules
+node_modules/
+
+# Build outputs (Vite / general)
+dist/
+build/
+out/
+.vite/
+
+# Environment variables
+# Local env files often contain secrets — do NOT commit them.
+.env
+.env.local
+.env.*.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor directories and files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+*.swo
+*.code-workspace
+
+# Coverage directory
+coverage/
+lcov-report/
+
+# TypeScript
+*.tsbuildinfo
+
+# Test output
+jest-cache/
+jest-report/
+.vscode-test/
+
+# Bundler / cache / misc
+.cache/
+.parcel-cache/
+.rpt2_cache/
+.eslintcache
+.terraform/
+.vagrant/
+*.tgz
+
+# Package manager lock files (keep package-lock.json / yarn.lock in repo normally)
+# Uncomment if you want to ignore specific lock files locally
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# Misc
+.pnpm-store/
+.nyc_output/
+*.seed
+*.pid
+*.pid.lock
+*.backup
+*.orig
+
+# Google Apps Script / gas build artifacts (if you generate files during deploy/build)
+# Adjust according to your workflow
+gas/dist/
+gas/.clasp.json
+clasp.json
+
+# Local node repl history
+.node_repl_history
+
+# Optional: ignore IDE run configurations / local settings
+# *.iml
+# .idea/**/workspace.xml
+
+agents.md
