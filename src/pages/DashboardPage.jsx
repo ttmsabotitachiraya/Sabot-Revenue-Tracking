@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import {
   PieChart,
   Pie,
@@ -84,6 +84,14 @@ export default function DashboardPage({ setActivePage }) {
       };
     });
   }, [projects, transactions]);
+
+  // Pagination for per-project chart
+  const [chartPage, setChartPage] = useState(0);
+  const PER_PAGE = 4;
+  useEffect(() => {
+    // reset to first page if number of projects changes
+    setChartPage(0);
+  }, [projectCompareData.length]);
 
   // Monthly trend data
   const monthlyData = useMemo(() => {
@@ -330,68 +338,120 @@ export default function DashboardPage({ setActivePage }) {
           เปรียบเทียบรายได้(จริง)และต้นทุน(จริง)ของแต่ละโครงการ
         </h2>
         {projectCompareData.length > 0 ? (
-          <ResponsiveContainer
-            width="100%"
-            height={Math.max(
-              260,
-              Math.ceil(projectCompareData.length / 4) * 260,
-            )}
-          >
-            <BarChart
-              data={projectCompareData}
-              margin={{
-                top: 10,
-                right: 16,
-                left: 0,
-                bottom: projectCompareData.length > 4 ? 60 : 40,
-              }}
-              layout="horizontal"
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis
-                dataKey="name"
-                tick={({ x, y, payload }) => {
-                  const maxLen = 10;
-                  const val = payload.value;
-                  const display =
-                    val.length > maxLen ? val.slice(0, maxLen) + "…" : val;
-                  return (
-                    <g transform={`translate(${x},${y})`}>
-                      <text
-                        x={0}
-                        y={0}
-                        dy={14}
-                        textAnchor="middle"
-                        fill="#6b7280"
-                        fontSize={10}
-                      >
-                        {display}
-                      </text>
-                    </g>
-                  );
+          <>
+            {/* Pagination controls */}
+            <div className="flex items-center justify-between mb-4">
+              <div className="text-sm text-gray-600">
+                แสดงข้อมูลโครงการ:{" "}
+                {Math.min(chartPage * PER_PAGE + 1, projectCompareData.length)}-
+                {Math.min(
+                  (chartPage + 1) * PER_PAGE,
+                  projectCompareData.length,
+                )}{" "}
+                จาก {projectCompareData.length}
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setChartPage((p) => Math.max(0, p - 1))}
+                  disabled={chartPage === 0}
+                  className={`px-3 py-1 rounded-md text-sm border ${
+                    chartPage === 0
+                      ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
+                      : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
+                  }`}
+                >
+                  ก่อนหน้า
+                </button>
+                <div className="text-sm text-gray-500">
+                  หน้า {chartPage + 1} /{" "}
+                  {Math.max(1, Math.ceil(projectCompareData.length / PER_PAGE))}
+                </div>
+                <button
+                  onClick={() =>
+                    setChartPage((p) =>
+                      Math.min(
+                        p + 1,
+                        Math.ceil(projectCompareData.length / PER_PAGE) - 1,
+                      ),
+                    )
+                  }
+                  disabled={
+                    chartPage >=
+                    Math.ceil(projectCompareData.length / PER_PAGE) - 1
+                  }
+                  className={`px-3 py-1 rounded-md text-sm border ${
+                    chartPage >=
+                    Math.ceil(projectCompareData.length / PER_PAGE) - 1
+                      ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
+                      : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
+                  }`}
+                >
+                  ถัดไป
+                </button>
+              </div>
+            </div>
+
+            {/* Single-row chart per page (up to PER_PAGE projects) */}
+            <ResponsiveContainer width="100%" height={260}>
+              <BarChart
+                data={projectCompareData.slice(
+                  chartPage * PER_PAGE,
+                  chartPage * PER_PAGE + PER_PAGE,
+                )}
+                margin={{
+                  top: 10,
+                  right: 16,
+                  left: 0,
+                  bottom: 40,
                 }}
-                interval={0}
-              />
-              <YAxis tickFormatter={fmtShort} tick={{ fontSize: 11 }} />
-              <Tooltip
-                formatter={(v, name) => [`฿${fmt(v)}`, name]}
-                labelFormatter={(label) => `โครงการ: ${label}`}
-              />
-              <Legend />
-              <Bar
-                dataKey="income"
-                fill="#2563EB"
-                name="รายได้จริง"
-                radius={[4, 4, 0, 0]}
-              />
-              <Bar
-                dataKey="cost"
-                fill="#EF4444"
-                name="ต้นทุนจริง"
-                radius={[4, 4, 0, 0]}
-              />
-            </BarChart>
-          </ResponsiveContainer>
+                layout="horizontal"
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis
+                  dataKey="name"
+                  tick={({ x, y, payload }) => {
+                    const maxLen = 10;
+                    const val = payload.value;
+                    const display =
+                      val.length > maxLen ? val.slice(0, maxLen) + "…" : val;
+                    return (
+                      <g transform={`translate(${x},${y})`}>
+                        <text
+                          x={0}
+                          y={0}
+                          dy={14}
+                          textAnchor="middle"
+                          fill="#6b7280"
+                          fontSize={10}
+                        >
+                          {display}
+                        </text>
+                      </g>
+                    );
+                  }}
+                  interval={0}
+                />
+                <YAxis tickFormatter={fmtShort} tick={{ fontSize: 11 }} />
+                <Tooltip
+                  formatter={(v, name) => [`฿${fmt(v)}`, name]}
+                  labelFormatter={(label) => `โครงการ: ${label}`}
+                />
+                <Legend />
+                <Bar
+                  dataKey="income"
+                  fill="#2563EB"
+                  name="รายได้จริง"
+                  radius={[4, 4, 0, 0]}
+                />
+                <Bar
+                  dataKey="cost"
+                  fill="#EF4444"
+                  name="ต้นทุนจริง"
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </>
         ) : (
           <div className="flex items-center justify-center h-[220px] text-gray-400 text-sm">
             ยังไม่มีข้อมูล
